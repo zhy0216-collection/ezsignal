@@ -33,7 +33,7 @@
             self._channel = {} // channelName: [func, ]
         })();
 
-        this.pub = this.publish = function(channelName){
+        this.trigger = this.pub = this.publish = function(channelName){
             return function(){
                 var args = arguments;
                 var funcList = self._channel[channelName] || [];
@@ -43,16 +43,25 @@
             }
         };
 
-        this.sub = this.subscribe = function(channelName, func){
-            _mapAppend(self._channel, channelName, func);
+        this.on = this.listenTo = this.sub = this.subscribe = function(channelName, func){
+            _mapAppend(self._channel, channelName, func, true);
         };
 
-        this.clearChannel = function(channelName){
+        this.off = this.clearChannel = function(channelName){
+            if(!channelName){
+                this.clearAllChannel();
+            }
 
+            if(this._channel.hasOwnProperty(channelName)){
+                delete this._channel[channelName];
+            }
         };
 
-        this.clearAllChannel = function(){
-
+        this.clearAllChannel = function(channelName){
+            var self = this;
+            Object.getOwnPropertyNames(self._channel).forEach(function(key, idx, array) {
+                delete self._channel[key]
+            });
         }
 
     }
@@ -64,7 +73,7 @@
     }
 
     EZSignal.getSignalByName = function(channelName){
-        return _namespace[channelName] || null;
+        return _namespace[channelName] || new EZSignal(channelName);
     }
 
     return EZSignal;
