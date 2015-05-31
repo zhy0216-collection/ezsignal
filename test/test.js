@@ -6,25 +6,38 @@ describe('EZSignal', function(){
 
 
     describe('#getSignalByName()', function(){
-        var testSignal = EZSignal.getSignalByName("test");
-        // assert.equal(signal, testSignal);
-        it('should assert.equal(signal, testSignal);')
+        it("get the same signals", function(){
+            var testSignal = EZSignal.getSignalByName("test");
+            assert.equal(signal, testSignal);
+        })
     })
 
     describe('pub, sub function, no parameters', function(){
-        var t = 1;
-        signal.sub("test", function(){
-            t = 2;
+        
+        it('should trigger sub', function(){
+            var t = 1;
+            signal.sub("test", function(){
+                t = 2;
+            });
+            assert.equal(t, 1);
+            signal.pub("test")();
+            assert.equal(t, 2);
         });
-        assert.equal(t, 1);
-
-        // signal.pub("test")();
-        it('should trigger sub');
     })
 
     describe('pub, sub function, with parameters', function(){
 
-        it('should trigger sub');
+        it('should trigger sub', function(){
+            var t = 1;
+            signal.sub("test", function(a){
+                t = 2 + a;
+            });
+            assert.equal(t, 1);
+            signal.pub("test")(3);
+            assert.equal(t, 5);
+            signal.pub("test")(4);
+            assert.equal(t, 6);
+        });
     })
 
     describe('pub, sub function, with different namespace', function(){
