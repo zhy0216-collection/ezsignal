@@ -126,6 +126,19 @@ describe('EZSignal', function(){
     })
 
 
+    describe('EZSignal.createChannel', function(){
+        it("should trigger func", function(){
+            var t = 1;
+            var channel = EZSignal.createChannel("test:test", function(x){
+                t = t + x;
+            })
+            assert.equal(t, 1);
+            channel(3);
+            assert.equal(t, 4);
+        })
+    })
+
+
 })
 
 

@@ -68,8 +68,21 @@
 
     // static fucntions
 
-    EZSignal.createChannel = function(){ // a easy way to create channel
-        // return _namespace[]
+    EZSignal.createChannel = function(complexName, func){ 
+        // a easy way to create channel
+        // channel name should contain :, such as signalname:channelname
+        var splitChar = ":";
+        var splitIndex = complexName.indexOf(splitChar);
+        if(splitIndex === -1){
+            throw new Error("channel name should contain `:` such as 'signalname:channelname'");
+        }
+
+        var signalName = complexName.slice(0, splitIndex);
+        var channelName = complexName.slice(splitIndex+1, complexName.length);
+        var signal = EZSignal.getSignalByName(signalName);
+        signal.sub(channelName, func);
+        return signal.pub(channelName);
+
     }
 
     EZSignal.getSignalByName = function(channelName){
