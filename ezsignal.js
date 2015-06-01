@@ -31,33 +31,50 @@
             }
             _namespace[name] = self;
             self._channel = {} // channelName: [func, ]
+            self._allFunc = []
         })();
 
-        this._removeChannelListen = function(channelName, rfunc){
-            var funcList = self._channel[channelName] || [];
-            funcList.forEach(function(func, index, array){
-                if(func === rfunc){
+        this._removeValueFromArray = function(xArray, xValue){
+            xArray.forEach(function(value, index, array){
+                if(value === xValue){
                     array.splice(index, 1);
                     return ;
                 }
             })
         }
 
+        this._removeChannelListen = function(channelName, rfunc){
+            var funcList = self._channel[channelName] || [];
+            this._removeValueFromArray(funcList, rfunc);
+        }
+
         this.trigger = this.pub = this.publish = function(channelName){
             return function(){
                 var args = arguments;
-                var funcList = self._channel[channelName] || [];
+                // shadow copy the channelList to avoid potential problem
+                var funcList = (self._channel[channelName] || []).slice(0);
                 funcList.forEach(function(func, index, array){
                     func.apply(this, args);
                     if(func.__once){
-                        self._removeChannelListen(channelName, func)
+                        self._removeChannelListen(channelName, func);
+                        self._removeValueFromArray(self._allFunc, func);
                     }
                 })
             }
         };
 
-        this.triggerAll = function(){
-
+        this.triggerAll = this.pubAll = this.publishAll = function(){
+            return function(){
+                var args = arguments;
+                var allFunc = self._allFunc.slice(0);
+                allFunc.forEach(function(func, index, array){
+                    func.apply(this, args);
+                    if(func.__once){
+                        self._removeChannelListen(func.__channelName, func);
+                        self._removeValueFromArray(self._allFunc, func);
+                    }
+                })
+            }
         }
 
         this.listenToOnce = this.once = function(channelName, func){
@@ -66,6 +83,8 @@
         }
 
         this.on = this.listenTo = this.sub = this.subscribe = function(channelName, func){
+            this._allFunc.unshift(func);
+            func.__channelName = channelName;
             _mapAppend(self._channel, channelName, func, true);
         };
 
