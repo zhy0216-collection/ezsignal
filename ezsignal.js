@@ -33,15 +33,37 @@
             self._channel = {} // channelName: [func, ]
         })();
 
+        this._removeChannelListen = function(channelName, rfunc){
+            var funcList = self._channel[channelName] || [];
+            funcList.forEach(function(func, index, array){
+                if(func === rfunc){
+                    array.splice(index, 1);
+                    return ;
+                }
+            })
+        }
+
         this.trigger = this.pub = this.publish = function(channelName){
             return function(){
                 var args = arguments;
                 var funcList = self._channel[channelName] || [];
                 funcList.forEach(function(func, index, array){
                     func.apply(this, args);
+                    if(func.__once){
+                        self._removeChannelListen(channelName, func)
+                    }
                 })
             }
         };
+
+        this.triggerAll = function(){
+
+        }
+
+        this.listenToOnce = this.once = function(channelName, func){
+            func.__once = true;
+            this.on(channelName, func);
+        }
 
         this.on = this.listenTo = this.sub = this.subscribe = function(channelName, func){
             _mapAppend(self._channel, channelName, func, true);

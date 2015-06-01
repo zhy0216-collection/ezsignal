@@ -83,6 +83,21 @@ describe('EZSignal', function(){
         });
     })
 
+    describe('once', function(){
+
+        it('should trigger once',function(){
+            var t = 1;
+            signal.once("test", function(a){
+                t = a + t;
+            });
+            assert.equal(t, 1);
+            signal.pub("test")(3);
+            assert.equal(t, 4); // 
+            signal.pub("test")(4); //
+            assert.equal(t, 4);
+        });
+    })
+
     describe('clearChannel', function(){
 
         it('should clearChannel',function(){
